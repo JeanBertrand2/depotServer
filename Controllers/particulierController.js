@@ -1,4 +1,4 @@
-import db from "../db.js";
+import db from "../config/db.js";
 import { ParticulierModel } from "../Model/Particulier.js";
 
 export const createParticulier = (req, res) => {
