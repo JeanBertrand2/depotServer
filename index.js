@@ -1,39 +1,46 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
-import msql from "mysql";
 import cors from "cors";
-import { PaysModel } from "./model/Pays.js";
-import { EtudiantsModel } from "./model/Etudiants.js";
+import sql from "mssql";
+
+import paysRoutes from "./Routes/paysRoutes.js"; 
+import prestatairesRoutes from "./Routes/prestatairesRoutes.js";
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-const db = msql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "de34%124",
-  database: "dbecole"
-});
+const PORT = process.env.PORT || 2083;
 
-// Route GET /pays
-app.get("/pays", (req, res) => {
-  const q = `SELECT * FROM ${PaysModel.table}`;
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.json(data);
+// Configuration SQL Server
+const config = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  server: process.env.DB_SERVER,
+  port: parseInt(process.env.DB_PORT),
+  database: process.env.DB_NAME,
+  options: {
+    encrypt: false,
+    trustServerCertificate: true
+  }
+};
+
+// Connexion SQL Server
+sql.connect(config).then(pool => {
+  console.log(" Connexion SQL Server réussie");
+
+  // Routes API
+  app.use("/api/pays", paysRoutes(pool));
+  app.use("/api/prestataires", prestatairesRoutes(pool));
+
+  app.listen(PORT, () => {
+    console.log(` Serveur lancé sur le port ${PORT}`);
+    console.log(" Utilisateur :", process.env.DB_USER);
+    console.log(" Base :", process.env.DB_NAME);
   });
-});
 
-// Route POST /etudiants
-app.post("/etudiants", (req, res) => {
-  const q = `INSERT INTO ${EtudiantsModel.table} (Name, Age) VALUES (?)`;
-  const values = [req.body.Name, req.body.Age];
-  db.query(q, [values], (err, data) => {
-    if (err) return res.status(500).json(err);
-    return res.json("L'étudiant a été créé avec succès");
-  });
-});
-
-app.listen(2083, () => {
-  console.log("Connected to backend!");
+}).catch(err => {
+  console.error(" Erreur de connexion SQL Server :", err);
 });
