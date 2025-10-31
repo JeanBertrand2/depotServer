@@ -5,13 +5,27 @@ export const createParticulier = (req, res) => {
   const body = req.body || {};
 
   const getByPath = (obj, path) =>
-    path.split(".").reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+    path
+      .split(".")
+      .reduce(
+        (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
+        obj
+      );
 
   const columnPathMap = {
-    codePaysNaissance: ["lieuNaissance.codePaysNaissance", "adressePostale.codePays"],
+    codePaysNaissance: [
+      "lieuNaissance.codePaysNaissance",
+      "adressePostale.codePays",
+    ],
     departementNaissance: ["lieuNaissance.departementNaissance"],
-    codeCommune_Naissance: ["lieuNaissance.communeNaissance.codeCommune", "lieuNaissance.codeCommune"],
-    libelleCommune_Naissance: ["lieuNaissance.communeNaissance.libelleCommune", "lieuNaissance.libelleCommune"],
+    codeCommune_Naissance: [
+      "lieuNaissance.communeNaissance.codeCommune",
+      "lieuNaissance.codeCommune",
+    ],
+    libelleCommune_Naissance: [
+      "lieuNaissance.communeNaissance.libelleCommune",
+      "lieuNaissance.libelleCommune",
+    ],
     numeroVoie: ["adressePostale.numeroVoie"],
     lettreVoie: ["adressePostale.lettreVoie"],
     codeTypeVoie: ["adressePostale.codeTypeVoie"],
@@ -40,7 +54,12 @@ export const createParticulier = (req, res) => {
 
     for (const k of Object.keys(body)) {
       const nested = body[k];
-      if (nested && typeof nested === "object" && !Array.isArray(nested) && nested[col] !== undefined) {
+      if (
+        nested &&
+        typeof nested === "object" &&
+        !Array.isArray(nested) &&
+        nested[col] !== undefined
+      ) {
         return nested[col];
       }
     }
@@ -65,25 +84,34 @@ export const createParticulier = (req, res) => {
   });
 
   if (missing.length) {
-    return res.status(400).json({ error: "Missing required fields", fields: missing });
+    return res
+      .status(400)
+      .json({ error: "Missing required fields", fields: missing });
   }
 
-  const columns = ParticulierModel.columns.filter((c) => c !== "ID_Particulier");
+  const columns = ParticulierModel.columns.filter(
+    (c) => c !== "ID_Particulier"
+  );
 
   const values = columns.map((col) => {
     const v = resolveField(col);
-    // if it's a date-like and provided as ISO string, keep as-is; otherwise return null for undefined
     return v !== undefined ? v : null;
   });
 
   const placeholders = "(" + columns.map(() => "?").join(",") + ")";
-  const sql = `INSERT INTO ${ParticulierModel.table} (${columns.join(",")}) VALUES ${placeholders}`;
+  const sql = `INSERT INTO ${ParticulierModel.table} (${columns.join(
+    ","
+  )}) VALUES ${placeholders}`;
 
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error("Error inserting Particulier:", err);
-      return res.status(500).json({ error: "Database error", details: err.message });
+      return res
+        .status(500)
+        .json({ error: "Database error", details: err.message });
     }
-    return res.status(201).json({ message: "Particulier created", id: result.insertId });
+    return res
+      .status(201)
+      .json({ message: "Particulier created", id: result.insertId });
   });
 };
