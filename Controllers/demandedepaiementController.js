@@ -25,9 +25,6 @@ export const createDemandePaiement = (req, res) => {
 export const rechercherPaiements = (req, res) => {
   const { dateDebut, dateFin, factures } = req.body;
   console.log("Requête reçue :", req.body);
-  if (!dateDebut || !dateFin) {
-    return res.status(400).json({ error: "Date début et fin obligatoires" });
-  }
 
   let sql = `
     SELECT 
@@ -39,7 +36,7 @@ export const rechercherPaiements = (req, res) => {
       p.nomUsage AS nom,
       p.prenoms AS prenom,
       p.p_dateNaissance AS naissance,
-      dp.idClient_numFactureTiers AS numFacture,
+      dp.numFactureTiers AS numFacture,
       dp.dateVersementAcompte AS dateAcompte,
       dp.mntAcompte AS montant,
       dp.idTiersFacturation AS idTiers,
@@ -51,21 +48,29 @@ export const rechercherPaiements = (req, res) => {
       dp.inforejetcommentaire,
       dp.mntVirement,
       dp.dateVirement
+     
     FROM DemandePaiement dp
     LEFT JOIN Particulier p ON p.ID_Particulier = dp.ID_Particulier
-    WHERE dp.dateFacture >= ? AND dp.dateFacture <= ?
+    WHERE 1 = 1
   `;
 
-  const params = [dateDebut, dateFin];
+  const params = [];
 
-  if (factures && factures.trim() !== "") {
+  // Filtre par date si fourni
+  if (dateDebut && dateFin) {
+    sql += ` AND dp.dateFacture >= ? AND dp.dateFacture <= ?`;
+    params.push(dateDebut, dateFin);
+  }
+
+  // Filtre par facture si fourni
+  if (factures && typeof factures === "string" && factures.trim() !== "") {
     const factureList = factures
       .split(",")
       .map(f => f.trim())
       .filter(f => f !== "");
 
     if (factureList.length > 0) {
-      sql += ` AND dp.idClient_numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
+      sql += ` AND dp.numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
       params.push(...factureList);
     }
   }
@@ -75,10 +80,73 @@ export const rechercherPaiements = (req, res) => {
       console.error("Erreur SQL :", err);
       return res.status(500).json({ error: "Erreur serveur", details: err.message });
     }
-    const total = results.length;
+
     res.json({
-    total,
-    data: results
+      total: results.length,
+      data: results
+    });
   });
-  });
+};
+const normalizeMontant = (val) => {
+  const num = parseFloat(val);
+  return isNaN(num) ? 0.00 : num;
+};
+
+export const interrogerPaiements = async (req, res) => {
+  const { dateDebut, dateFin, factures } = req.body;
+  const factureList = (factures || "")
+    .split(",")
+    .map(f => f.trim())
+    .filter(f => f !== "");
+
+  const results = [];
+
+  for (const numFacture of factureList) {
+    try {
+      // Appel à l’API URSSAF (à adapter selon ton endpoint)
+      const apiResponse = await fetch(`https://api.urssaf.fr/paiement/${numFacture}`);
+      const data = await apiResponse.json();
+
+      const dp = {
+        idDemandePaiement: data.idDemandePaiement,
+        idClient: data.demandePaiement.idClient,
+        idTiersFacturation: data.demandePaiement.idTiersFacturation,
+        numFactureTiers: data.demandePaiement.numFactureTiers,
+        dateFacture: data.demandePaiement.dateFacture,
+        dateDebutEmploi: data.demandePaiement.p_dateDebutEmploi,
+        dateFinEmploi: data.demandePaiement.p_dateFinEmploi,
+        mntAcompte: normalizeMontant(data.demandePaiement.mntAcompte),
+        dateVersementAcompte: data.demandePaiement.dateVersementAcompte,
+        mntFactureTTC: normalizeMontant(data.demandePaiement.mntFactureTTC),
+        mntFactureHT: normalizeMontant(data.demandePaiement.mntFactureHT),
+        statut: data.statut.code,
+        statutlibelle: data.statut.libelle,
+        inforejet: data.infoRejet.code,
+        inforejetcommentaire: data.infoRejet.commentaire,
+        mntVirement: normalizeMontant(data.infoVirement.mntVirement),
+        dateVirement: data.infoVirement.p_dateVirement,
+        dateHeureModification: new Date()
+      };
+
+      // Vérifie si la facture existe déjà
+      const [existing] = await db.query(
+        "SELECT * FROM DemandePaiement WHERE numFactureTiers = ?",
+        [numFacture]
+      );
+
+
+      if (existing.length > 0) {
+        await db.query("UPDATE DemandePaiement SET ? WHERE numFactureTiers = ?", [dp, numFacture]);
+
+      } else {
+        await db.query("INSERT INTO DemandePaiement SET ?", [dp]);
+      }
+
+      results.push(dp);
+    } catch (err) {
+      console.error(`Erreur pour ${numFacture} :`, err.message);
+    }
+  }
+
+  res.json({ total: results.length, data: results });
 };
