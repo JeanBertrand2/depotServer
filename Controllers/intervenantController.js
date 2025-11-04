@@ -27,6 +27,7 @@ export const getAllIntervenants = (req, res) => {
     return res.status(200).json(results);
   });
 };
+
 export const getIntervenantById = (req, res) => {
   const { id } = req.params;
   const query = `SELECT * FROM ${Intervenant.tableName} WHERE ID_Intervenant = ?`;
