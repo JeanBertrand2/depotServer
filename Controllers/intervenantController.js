@@ -3,6 +3,17 @@ import { Intervenant } from "../Model/Intervenant.js";
 
 export const createIntervenant = (req, res) => {
   const { civilite, nomIntervenant, prenomIntervenant } = req.body;
+  // Input validation for required fields
+  const missingFields = [];
+  if (!civilite) missingFields.push("civilite");
+  if (!nomIntervenant) missingFields.push("nomIntervenant");
+  if (!prenomIntervenant) missingFields.push("prenomIntervenant");
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      missingFields
+    });
+  }
   const query = `INSERT INTO ${Intervenant.tableName} (civilite, nomIntervenant, prenomIntervenant) VALUES (?, ?, ?)`;
   db.query(
     query,
