@@ -56,6 +56,14 @@ export const getIntervenantById = (req, res) => {
 export const updateIntervenant = (req, res) => {
   const { id } = req.params;
   const { civilite, nomIntervenant, prenomIntervenant } = req.body;
+  // Input validation: ensure at least one field is present
+  if (
+    (civilite === undefined || civilite === null || civilite === "") &&
+    (nomIntervenant === undefined || nomIntervenant === null || nomIntervenant === "") &&
+    (prenomIntervenant === undefined || prenomIntervenant === null || prenomIntervenant === "")
+  ) {
+    return res.status(400).json({ error: "At least one field (civilite, nomIntervenant, prenomIntervenant) must be provided for update." });
+  }
   const query = `UPDATE ${Intervenant.tableName} SET civilite = ?, nomIntervenant = ?, prenomIntervenant = ? WHERE ID_Intervenant = ?`;
   db.query(
     query,
