@@ -46,10 +46,11 @@ export async function getApi(apiUrl,params,tokenUrl,clientId,clientSecret,scope)
           'Content-Type': 'application/json',         
            Authorization:`Bearer ${accessToken.access_token}`,                                                                                                               
         }  ,                 
-        body:data,      
+        body:JSON.stringify(data),      
       });     
     } catch (error) {
       console.error('Erreur lors de l\'appel à l\'API:',  error.message);
       throw error;
     }
+
   }
