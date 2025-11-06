@@ -35,37 +35,4 @@ export async function getToken() {
   }
 }
 
-export async function getApi(apiUrl, params) {
-  const accessToken = await getToken();
-  try {
-    const response = await axios.get(apiUrl, {
-      params,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Erreur lors de l'appel à l'API:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-}
 
-export async function postApi(apiUrl, data) {
-  let accessToken = await getToken("production");
-  try {
-    const response = await axios.post(apiUrl, data, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Erreur lors de l'appel à l'API:", error.message);
-    throw error;
-  }
-}
