@@ -1,29 +1,20 @@
 import axios from "axios";
 import querystring from "querystring";
 
-async function getToken(env = "production") {
-  const { data } = await axios.get("http://localhost:2083/prestataires/urssaf");
-  const config = data[env];
+const tokenUrl = process.env.URSSAF_TOKEN_URL;
+const clientId = process.env.URSSAF_CLIENT_ID;
+const clientSecret = process.env.URSSAF_CLIENT_SECRET;
+const scope = process.env.URSSAF_SCOPE;
 
-  if (!config)
-    throw new Error(
-      `Configuration URSSAF introuvable pour l'environnement ${env}`
-    );
-
-  const { clientID, clientSecret, scope, urlToken } = config;
-
-  const tokenUrl = urlToken;
-  const clientId = clientID;
-  const clientSecretT = clientSecret;
-  const scopeT = scope;
+export async function getToken() {
   try {
     const response = await axios.post(
       tokenUrl,
       querystring.stringify({
         grant_type: "client_credentials",
         client_id: clientId,
-        client_secret: clientSecretT,
-        scope: scopeT,
+        client_secret: clientSecret,
+        scope: scope,
       }),
       {
         headers: {
@@ -31,25 +22,34 @@ async function getToken(env = "production") {
         },
       }
     );
-    return response.data.accessToken.access_token;
+
+    console.log("Réponse complète du token:", response.data);
+
+    return response.data.access_token;
   } catch (error) {
-    console.error("Erreur lors de l'obtention du token:", error.message);
+    console.error(
+      "Erreur lors de l'obtention du token:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 }
 
 export async function getApi(apiUrl, params) {
-  let accessToken = await getToken("production");
+  const accessToken = await getToken();
   try {
     const response = await axios.get(apiUrl, {
       params,
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'appel à l'API:", error.message);
+    console.error(
+      "Erreur lors de l'appel à l'API:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 }
@@ -57,13 +57,13 @@ export async function getApi(apiUrl, params) {
 export async function postApi(apiUrl, data) {
   let accessToken = await getToken("production");
   try {
-    const response = await axios.post(apiUrl, {
+    const response = await axios.post(apiUrl, data, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(data),
     });
+    return response.data;
   } catch (error) {
     console.error("Erreur lors de l'appel à l'API:", error.message);
     throw error;
