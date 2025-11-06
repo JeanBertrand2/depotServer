@@ -1,7 +1,8 @@
 import axios from "axios";
 import querystring from "querystring";
 
-const URSSAF_CONFIG_URL = process.env.URSSAF_CONFIG_URL;
+const URSSAF_CONFIG_URL =
+  process.env.URSSAF_CONFIG_URL || "http://localhost:2083/prestataires/urssaf";
 
 export async function getToken(env = "production") {
   const { data } = await axios.get(URSSAF_CONFIG_URL);
@@ -13,12 +14,14 @@ export async function getToken(env = "production") {
       `Configuration URSSAF introuvable pour l'environnement ${env}`
     );
 
-  const { clientID, clientSecret, scope, urlToken } = config;
+  const { clientID, clientSecret, scope, urlToken, urlRequete } = config;
 
   const tokenUrl = urlToken;
   const clientId = clientID;
   const clientSecretT = clientSecret;
   const scopeT = scope;
+  const urlProdLocal = `${urlRequete}/particulier`;
+
   try {
     const response = await axios.post(
       tokenUrl,
@@ -34,7 +37,7 @@ export async function getToken(env = "production") {
         },
       }
     );
-    return response.data.access_token;
+    return { accessToken: response.data.access_token, urlProd: urlProdLocal };
   } catch (error) {
     console.error("Erreur lors de l'obtention du token:", error.message);
     throw error;
@@ -42,7 +45,7 @@ export async function getToken(env = "production") {
 }
 
 export async function getApi(apiUrl, params) {
-  const accessToken = await getToken();
+  const { accessToken } = await getToken();
   try {
     const response = await axios.get(apiUrl, {
       params,
@@ -60,10 +63,11 @@ export async function getApi(apiUrl, params) {
   }
 }
 
-export async function postApi(apiUrl, data) {
-  let accessToken = await getToken("production");
+export async function postApi(data) {
+  const { accessToken, urlProd } = await getToken("production");
+  if (!urlProd) throw new Error("URL de requête URSSAF introuvable");
   try {
-    const response = await axios.post(apiUrl, data, {
+    const response = await axios.post(urlProd, data, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
