@@ -1,6 +1,18 @@
 import db from "../config/db.js";
 import { ParticulierModel } from "../Model/Particulier.js";
 
+export const getParticulier= (req, res) => {
+const query = `SELECT * FROM ${ParticulierModel.table}`;
+  db.query(query, (error, data) => {
+    if (error) {  
+      console.log("liste particulier error : ");   
+      return res.status(500).json({ error: "Erreur de la base de données" });
+    }
+    console.log("liste particulier : ",data);
+    return res.status(200).json(data);
+  });
+}
+
 export const createParticulier = (req, res) => {
   const body = req.body || {};
 
