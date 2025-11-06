@@ -38,6 +38,9 @@ export const createParticulier = (req, res) => {
     codePays: ["adressePostale.codePays"],
     bic: ["coordonneeBancaire.bic"],
     iban: ["coordonneeBancaire.iban"],
+    IBAN: ["coordonneeBancaire.iban"],
+    libelleCommune_Adresse: ["adressePostale.libelleCommune"],
+    codeCommune_Adresse: ["adressePostale.codeCommune"],
     titulaire: ["coordonneeBancaire.titulaire"],
   };
 
