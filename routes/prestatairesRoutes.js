@@ -3,7 +3,8 @@ import {
   createPrestataire,
   updatePrestataire,
   checkPrestataireExistence,
-  getPrestataireById
+  getPrestataireById,
+  getUrssafParams
 } from "../Controllers/prestatairesController.js";
 
 
@@ -20,5 +21,8 @@ router.get("/check", checkPrestataireExistence);
 
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
+//Récuperation url/token
+router.get("/urssaf", getUrssafParams);
+
 
 export default router;
