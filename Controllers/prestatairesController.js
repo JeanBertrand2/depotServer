@@ -72,3 +72,42 @@ export const getPrestataireById = (req, res) => {
     res.json(results[0]);
   });
 };
+
+export const getUrssafParams = (req, res) => {
+  const sql = `
+    SELECT 
+      ClientIDProduction, ClientSecretProduction, ScopeProduction, UrlTokenProduction, UrlRequeteProduction,
+      ClientIDSandBox, ClientSecretSandBox, ScopeSandBox, UrlTokenSandBox, UrlRequeteSandBox
+    FROM ${PrestatairesModel.table}
+    LIMIT 1
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Erreur lors de la récupération des paramètres URSSAF :", err);
+      return res.status(500).json({ error: "Erreur base de données", details: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: "Aucun prestataire trouvé" });
+    }
+
+    const row = results[0];
+    res.json({
+      production: {
+        clientID: row.ClientIDProduction,
+        clientSecret: row.ClientSecretProduction,
+        scope: row.ScopeProduction,
+        urlToken: row.UrlTokenProduction,
+        urlRequete: row.UrlRequeteProduction,
+      },
+      sandbox: {
+        clientID: row.ClientIDSandBox,
+        clientSecret: row.ClientSecretSandBox,
+        scope: row.ScopeSandBox,
+        urlToken: row.UrlTokenSandBox,
+        urlRequete: row.UrlRequeteSandBox,
+      },
+    });
+  });
+}; 
