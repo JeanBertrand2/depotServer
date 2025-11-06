@@ -22,6 +22,6 @@ router.get("/urssaf", getUrssafParams);
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
 
-//Récuperation url/token
+// Récupération url/token
 
 export default router;
