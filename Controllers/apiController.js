@@ -28,7 +28,7 @@ export async function getApi(apiUrl,params,tokenUrl,clientId,clientSecret,scope)
              params ,               
         headers: {   
           'Content-Type': 'application/json',         
-           Authorization:`Bearer ${accessToken.access_token}`,                                                                                                               
+           Authorization:`Bearer ${accessToken}`,                                                                                                               
         }  ,                 
                 
       });     
@@ -44,7 +44,7 @@ export async function getApi(apiUrl,params,tokenUrl,clientId,clientSecret,scope)
       const response = await axios.post(apiUrl,{                       
         headers: {   
           'Content-Type': 'application/json',         
-           Authorization:`Bearer ${accessToken.access_token}`,                                                                                                               
+           Authorization:`Bearer ${accessToken}`,                                                                                                               
         }  ,                 
         body:JSON.stringify(data),      
       });     
@@ -54,3 +54,4 @@ export async function getApi(apiUrl,params,tokenUrl,clientId,clientSecret,scope)
     }
 
   }
+
