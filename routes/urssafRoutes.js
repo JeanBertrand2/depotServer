@@ -1,6 +1,6 @@
 import express from "express";
 import axios from "axios";
-import { getToken } from "../Controllers/apiController.js";
+import { getToken } from "../Controllers/apiController2.js";
 
 const router = express.Router();
 const URSSAF_API_URL = process.env.URSSAF_API_URL;
