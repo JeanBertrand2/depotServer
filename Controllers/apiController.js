@@ -1,10 +1,12 @@
 import axios from "axios";
 import querystring from "querystring";
 
-async function getToken(env = "production") {
-  const { data } = await axios.get("http://localhost:2083/prestataires/urssaf");
-  const config = data[env];
+const URSSAF_CONFIG_URL = process.env.URSSAF_CONFIG_URL;
+export async function getToken(env = "production") {
+  const { data } = await axios.get(URSSAF_CONFIG_URL);
+  console.log(data);
 
+  const config = data[env];
   if (!config)
     throw new Error(
       `Configuration URSSAF introuvable pour l'environnement ${env}`
@@ -31,7 +33,7 @@ async function getToken(env = "production") {
         },
       }
     );
-    return response.data.accessToken.access_token;
+    return response.data.access_token;
   } catch (error) {
     console.error("Erreur lors de l'obtention du token:", error.message);
     throw error;

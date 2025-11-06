@@ -4,9 +4,8 @@ import {
   updatePrestataire,
   checkPrestataireExistence,
   getPrestataireById,
-  getUrssafParams
+  getUrssafParams,
 } from "../Controllers/prestatairesController.js";
-
 
 const router = express.Router();
 
@@ -18,11 +17,11 @@ router.put("/", updatePrestataire);
 
 // Vérifier s’il existe au moins un prestataire
 router.get("/check", checkPrestataireExistence);
+router.get("/urssaf", getUrssafParams);
 
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
-//Récuperation url/token
-router.get("/urssaf", getUrssafParams);
 
+//Récuperation url/token
 
 export default router;

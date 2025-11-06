@@ -29,7 +29,7 @@ export const createPrestataire = (req, res) => {
   });
 };
 
-// Modifier un prestataire existant
+
 export const updatePrestataire = (req, res) => {
   const data = req.body || {};
   const { ID_Prestataires } = data;
@@ -99,7 +99,7 @@ export const getUrssafParams = (req, res) => {
       ClientIDSandBox, ClientSecretSandBox, ScopeSandBox, UrlTokenSandBox, UrlRequeteSandBox
     FROM ${PrestatairesModel.table}
     LIMIT 1
-  `;
+  `; 
 
   db.query(sql, (err, results) => {
     if (err) {
