@@ -34,7 +34,7 @@ async function getToken(env = "production") {
 
 export async function getApi(apiUrl,params) {
 
-    let accessToken = await getToken(tokenUrl,clientId,clientSecret,scope);                 
+    let accessToken = await getToken("production");                 
     try {
       
       const response = await axios.get(apiUrl,{   
@@ -57,7 +57,7 @@ export async function getApi(apiUrl,params) {
 
  export async function postApi(apiUrl,data) {
   
-    let accessToken = await getToken(tokenUrl,clientId,clientSecret,scope);                 
+    let accessToken = await getToken("production");                 
     try {     
       const response = await axios.post(apiUrl,{                       
         headers: {   
