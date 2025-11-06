@@ -73,7 +73,7 @@ export async function postApi(data) {
     });
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'appel à l'API:", error.message);
+    console.error("Erreur lors de l'appel à l'API:", error.response?.data || error.message);
     throw error;
   }
 }
