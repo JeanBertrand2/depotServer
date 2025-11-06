@@ -2,6 +2,7 @@ import axios from "axios";
 import querystring from "querystring";
 
 const URSSAF_CONFIG_URL = process.env.URSSAF_CONFIG_URL;
+
 export async function getToken(env = "production") {
   const { data } = await axios.get(URSSAF_CONFIG_URL);
   console.log(data);
