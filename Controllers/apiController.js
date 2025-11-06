@@ -6,8 +6,6 @@ const URSSAF_CONFIG_URL =
 
 export async function getToken(env = "production") {
   const { data } = await axios.get(URSSAF_CONFIG_URL);
-  console.log(data);
-
   const config = data[env];
   if (!config)
     throw new Error(
