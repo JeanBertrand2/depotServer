@@ -12,7 +12,29 @@ const query = `SELECT * FROM ${ParticulierModel.table}`;
     return res.status(200).json(data);
   });
 }
-
+export const updateParticulier= (data) => {
+  if(data && data != null)
+  {
+    const idClient = data.idClient;
+    const statutCode = data.statut.code;
+    const statutDescript = data.statut.description;
+   const statutEtat = data.statut.etat;
+  const query = `UPDATE ${ParticulierModel.table}
+              SET statutCode = '${statutCode}',
+              statutDescription = '${statutDescript}',
+              statutEtat = '${statutEtat}'
+              WHERE idClient = '${idClient}' `;
+  db.query(query, (error, data) => {
+    if (error) {  
+         
+      return "Erreur de la base de données" ;
+    }
+    return "Statut récupéré avec succès.";
+  });
+  }
+  else
+    return "Aucune réponse venant de urssaf" ;
+}
 export const createParticulier = (req, res) => {
   const body = req.body || {};
 
