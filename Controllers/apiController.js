@@ -43,21 +43,18 @@ async function getToken(env = "production") {
   }
 }
 
-export async function getApi(apiUrl, params) {
-  const { accessToken } = await getToken();
+export async function getApi(params) {
+  let { accessToken, urlRequete } = await getToken("production");
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(urlRequete, {
       params,
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return response.data;
   } catch (error) {
-    console.error(
-      "Erreur lors de l'appel à l'API:",
-      error.response?.data || error.message
-    );
+    console.error("Erreur lors de l'appel à l'API:", error.message);
     throw error;
   }
 }
