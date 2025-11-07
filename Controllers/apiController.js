@@ -52,6 +52,7 @@ export async function getApi(params) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    return response.data;
   } catch (error) {
     console.error("Erreur lors de l'appel à l'API:", error.message);
     throw error;
