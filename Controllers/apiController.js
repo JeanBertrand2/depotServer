@@ -4,7 +4,7 @@ import querystring from "querystring";
 const URSSAF_CONFIG_URL =
   process.env.URSSAF_CONFIG_URL || "http://localhost:2083/prestataires/urssaf";
 
-export async function getToken(env = "production") {
+async function getToken(env = "production") {
   const { data } = await axios.get(URSSAF_CONFIG_URL);
   const config = data[env];
   if (!config)
@@ -18,7 +18,6 @@ export async function getToken(env = "production") {
   const clientId = clientID;
   const clientSecretT = clientSecret;
   const scopeT = scope;
-  const urlProdLocal = `${urlRequete}/particulier`;
 
   try {
     const response = await axios.post(
@@ -35,37 +34,19 @@ export async function getToken(env = "production") {
         },
       }
     );
-    return { accessToken: response.data.access_token, urlProd: urlProdLocal };
+
+    return { accessToken: response.data.access_token, urlRequete };
   } catch (error) {
     console.error("Erreur lors de l'obtention du token:", error.message);
     throw error;
   }
 }
 
-export async function getApi(apiUrl, params) {
-  const { accessToken } = await getToken();
+export async function getApi(params) {
+  const { accessToken, urlRequete } = await getToken("production");
   try {
-    const response = await axios.get(apiUrl, {
+    const response = await axios.get(urlRequete, {
       params,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Erreur lors de l'appel à l'API:",
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-}
-
-export async function postApi(data) {
-  const { accessToken, urlProd } = await getToken("production");
-  if (!urlProd) throw new Error("URL de requête URSSAF introuvable");
-  try {
-    const response = await axios.post(urlProd, data, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
@@ -73,7 +54,34 @@ export async function postApi(data) {
     });
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'appel à l'API:", error.response?.data || error.message);
+    console.error("Erreur lors de l'appel à l'API:", error.message);
+    throw error;
+  }
+}
+
+export async function postApi(data) {
+  const { accessToken, urlRequete } = await getToken("production");
+  const { methode, ...body } = data;
+  const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
+
+  try {
+    const response = await axios.post(fullUrl, body, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        "recouv.origin.id": "819d80f5-fe9f-444b-bfcb-4f2ea9cf3d4c",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Erreur lors de l'appel à l'API URSSAF :",
+      error.response?.data || error.message
+    );
+    console.error("Code HTTP :", error.response?.status);
+    console.error("Headers :", error.response?.headers);
     throw error;
   }
 }
