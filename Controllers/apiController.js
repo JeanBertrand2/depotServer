@@ -43,7 +43,7 @@ async function getToken(env = "production") {
 }
 
 export async function getApi(params) {
-  let { accessToken, urlRequete } = await getToken("production");
+  const { accessToken, urlRequete } = await getToken("production");
   try {
     const response = await axios.get(urlRequete, {
       params,
