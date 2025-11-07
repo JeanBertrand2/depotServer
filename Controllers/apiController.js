@@ -35,7 +35,6 @@ async function getToken(env = "production") {
       }
     );
 
-    console.log(response.data.access_token, urlRequete);
     return { accessToken: response.data.access_token, urlRequete };
   } catch (error) {
     console.error("Erreur lors de l'obtention du token:", error.message);
@@ -60,14 +59,9 @@ export async function getApi(params) {
 }
 
 export async function postApi(data) {
-  console.log(" postApi() appelée avec :", data);
-
   const { accessToken, urlRequete } = await getToken("production");
   const { methode, ...body } = data;
   const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
-
-  console.log(" Appel URSSAF vers :", fullUrl);
-  console.log("Payload transmis :", JSON.stringify(body, null, 2));
 
   try {
     const response = await axios.post(fullUrl, body, {
@@ -78,10 +72,7 @@ export async function postApi(data) {
         "recouv.origin.id": "819d80f5-fe9f-444b-bfcb-4f2ea9cf3d4c",
       },
     });
-    console.log(
-      "Réponse brute URSSAF :",
-      JSON.stringify(response.data, null, 2)
-    );
+
     return response.data;
   } catch (error) {
     console.error(
