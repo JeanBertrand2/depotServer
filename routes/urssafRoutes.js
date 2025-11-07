@@ -12,7 +12,7 @@ router.post("/particulier", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.post("/getUrssaf", async (req, res) => {
+router.post("/getStatut", async (req, res) => {
   // const urlParams = new URLSearchParams(req.originalUrl.split('?')[1]);
   // const params = Object.fromEntries(urlParams.entries());
   // const url = params.url;
