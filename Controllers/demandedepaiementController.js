@@ -30,7 +30,8 @@ export const rechercherPaiements = (req, res) => {
 
   let sql = `
     SELECT 
-      dp.id_DemandePaiement AS idDemande,
+     
+      dp.idDemandePaiement ,
       dp.dateFacture AS datefacture,
       dp.dateDebutEmploi AS debutEmploi,
       dp.dateFinEmploi AS finEmploi,
@@ -82,6 +83,7 @@ export const rechercherPaiements = (req, res) => {
       console.error("Erreur SQL :", err);
       return res.status(500).json({ error: "Erreur serveur", details: err.message });
     }
+console.log("Résultat SQL :", results);
 
     res.json({
       total: results.length,
@@ -167,11 +169,12 @@ export const recupererListeFacturePeriode = (req, res) => {
   let sql = `SELECT idDemandePaiement,numFactureTiers FROM DemandePaiement WHERE numFactureTiers <> ''`;
   const params = [];
 
-  if (gf_sListeFacture && gf_sListeFacture.trim() !== "") {
+  if (Array.isArray(gf_sListeFacture) && gf_sListeFacture.length > 0) {
+
     const factureList = gf_sListeFacture
-      .split(",")
       .map(f => f.trim())
       .filter(f => f !== "");
+
 
     sql += ` AND numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
     params.push(...factureList);
@@ -282,14 +285,22 @@ export const updateDemandePaiement = (req, res) => {
 
 export const interrogerViaBackend = async (req, res) => {
   try {
-    const { payload } = req.body;
+    const payload = req.body; 
+
+    console.log("Payload reçu dans interrogerViaBackend :", payload);
+
     const result = await postApi(payload); 
+
     res.json(result);
   } catch (err) {
     console.error("Erreur dans interrogerViaBackend :", err.message);
-    res.status(500).json({ error: "Erreur lors de l'appel à URSSAF", details: err.message });
+    res.status(500).json({
+      error: "Erreur lors de l'appel à URSSAF",
+      details: err.message
+    });
   }
 };
+
 
 // Fonction utilitaire pour rendre les requêtes MySQL compatibles avec async/await
 const queryAsync = (sql, values) => {
