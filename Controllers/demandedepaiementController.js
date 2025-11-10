@@ -30,7 +30,8 @@ export const rechercherPaiements = (req, res) => {
 
   let sql = `
     SELECT 
-      dp.id_DemandePaiement AS idDemande,
+     
+      dp.idDemandePaiement ,
       dp.dateFacture AS datefacture,
       dp.dateDebutEmploi AS debutEmploi,
       dp.dateFinEmploi AS finEmploi,
@@ -82,6 +83,7 @@ export const rechercherPaiements = (req, res) => {
       console.error("Erreur SQL :", err);
       return res.status(500).json({ error: "Erreur serveur", details: err.message });
     }
+console.log("Résultat SQL :", results);
 
     res.json({
       total: results.length,
@@ -167,11 +169,12 @@ export const recupererListeFacturePeriode = (req, res) => {
   let sql = `SELECT idDemandePaiement,numFactureTiers FROM DemandePaiement WHERE numFactureTiers <> ''`;
   const params = [];
 
-  if (gf_sListeFacture && gf_sListeFacture.trim() !== "") {
+  if (Array.isArray(gf_sListeFacture) && gf_sListeFacture.length > 0) {
+
     const factureList = gf_sListeFacture
-      .split(",")
       .map(f => f.trim())
       .filter(f => f !== "");
+
 
     sql += ` AND numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
     params.push(...factureList);
@@ -282,28 +285,46 @@ export const updateDemandePaiement = (req, res) => {
 
 export const interrogerViaBackend = async (req, res) => {
   try {
-    const { payload } = req.body;
+    const payload = req.body; 
+
+    console.log("Payload reçu dans interrogerViaBackend :", payload);
+
     const result = await postApi(payload); 
+
     res.json(result);
   } catch (err) {
     console.error("Erreur dans interrogerViaBackend :", err.message);
-    res.status(500).json({ error: "Erreur lors de l'appel à URSSAF", details: err.message });
+    res.status(500).json({
+      error: "Erreur lors de l'appel à URSSAF",
+      details: err.message
+    });
   }
+};
+
+
+// Fonction utilitaire pour rendre les requêtes MySQL compatibles avec async/await
+const queryAsync = (sql, values) => {
+  return new Promise((resolve, reject) => {
+    db.query(sql, values, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
 };
 
 export const upsertDemandePaiement = async (req, res) => {
   const data = req.body;
-  const numFacture = (data.numFactureTiers || "").trim().toUpperCase();
+  const numFacture = (data.numFactureTiers || '').trim().toUpperCase();
 
   if (!numFacture) {
-    return res.status(400).json({ error: "numFactureTiers manquant" });
+    return res.status(400).json({ error: 'numFactureTiers manquant' });
   }
 
   const dp = {
     idDemandePaiement: data.idDemandePaiement,
     idClient: data.idClient,
     idTiersFacturation: data.idTiersFacturation,
-    numFactureTiers: numFacture, // ← ici on met la version nettoyée
+    numFactureTiers: numFacture,
     dateFacture: data.dateFacture,
     dateDebutEmploi: data.dateDebutEmploi,
     dateFinEmploi: data.dateFinEmploi,
@@ -321,24 +342,70 @@ export const upsertDemandePaiement = async (req, res) => {
   };
 
   try {
-    const existingRows = await db.query(
-      "SELECT * FROM DemandePaiement WHERE numFactureTiers = ?",
+    const existingRows = await queryAsync(
+      'SELECT * FROM DemandePaiement WHERE numFactureTiers = ?',
       [numFacture]
     );
 
+    console.log('Résultat SELECT :', existingRows);
+
     if (existingRows.length > 0) {
-      await db.query(
-        "UPDATE DemandePaiement SET ? WHERE numFactureTiers = ?",
-        [dp, numFacture]
+      const result = await queryAsync(
+        `UPDATE DemandePaiement SET 
+          idDemandePaiement = ?, 
+          idClient = ?, 
+          idTiersFacturation = ?, 
+          dateFacture = ?, 
+          dateDebutEmploi = ?, 
+          dateFinEmploi = ?, 
+          mntAcompte = ?, 
+          dateVersementAcompte = ?, 
+          mntFactureTTC = ?, 
+          mntFactureHT = ?, 
+          statut = ?, 
+          statutlibelle = ?, 
+          inforejet = ?, 
+          inforejetcommentaire = ?, 
+          mntVirement = ?, 
+          dateVirement = ?, 
+          dateHeureModification = ?
+        WHERE numFactureTiers = ?`,
+        [
+          dp.idDemandePaiement,
+          dp.idClient,
+          dp.idTiersFacturation,
+          dp.dateFacture,
+          dp.dateDebutEmploi,
+          dp.dateFinEmploi,
+          dp.mntAcompte,
+          dp.dateVersementAcompte,
+          dp.mntFactureTTC,
+          dp.mntFactureHT,
+          dp.statut,
+          dp.statutlibelle,
+          dp.inforejet,
+          dp.inforejetcommentaire,
+          dp.mntVirement,
+          dp.dateVirement,
+          dp.dateHeureModification,
+          numFacture
+        ]
       );
-      return res.json({ message: "Demande modifiée", facture: numFacture });
+
+      console.log('Lignes modifiées :', result.affectedRows);
+
+      if (result.affectedRows > 0) {
+        return res.json({ message: 'Demande modifiée', facture: numFacture });
+      } else {
+        return res.status(200).json({ message: 'Aucune modification nécessaire', facture: numFacture });
+      }
     } else {
       dp.dateHeureCreation = new Date();
-      await db.query("INSERT INTO DemandePaiement SET ?", [dp]);
-      return res.status(201).json({ message: "Demande ajoutée", facture: numFacture });
+      await queryAsync('INSERT INTO DemandePaiement SET ?', [dp]);
+      return res.status(201).json({ message: 'Demande ajoutée', facture: numFacture });
     }
   } catch (err) {
-    console.error("Erreur upsert :", err.message);
-    return res.status(500).json({ error: "Erreur serveur", details: err.message });
+    console.error('Erreur upsert :', err.message);
+    return res.status(500).json({ error: 'Erreur serveur', details: err.message });
   }
 };
