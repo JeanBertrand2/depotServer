@@ -72,22 +72,44 @@ export const deleteUser = (req, res) => {
   });
 };
 
-export const updateUser = (req, res) => {
-  const id = req.params.id;
-  const { Login, MotDePasse, Nom, Prenoms, adresseMail } = req.body;
-  const query = `UPDATE ${UtilisateursModel.table} SET Login = ?, MotDePasse = ?, Nom = ?, Prenoms = ?, adresseMail = ? WHERE ID_Utilisateurs = ?`;
-  db.query(
-    query,
-    [Login, MotDePasse, Nom, Prenoms, adresseMail, id],
-    (error, data) => {
-      if (error) {
-        console.log("update user error : ", error);
+export const updateUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { Login, MotDePasse, Nom, Prenoms, adresseMail } = req.body;
+
+    const fields = [];
+    const values = [];
+
+    if (Login) fields.push("Login = ?"), values.push(Login);
+    if (Nom) fields.push("Nom = ?"), values.push(Nom);
+    if (Prenoms) fields.push("Prenoms = ?"), values.push(Prenoms);
+    if (adresseMail) fields.push("adresseMail = ?"), values.push(adresseMail);
+    if (MotDePasse) {
+      const hashed = await bcrypt.hash(MotDePasse, 10);
+      fields.push("MotDePasse = ?");
+      values.push(hashed);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: "Aucune donnée à mettre à jour" });
+    }
+
+    const query = `UPDATE ${UtilisateursModel.table} SET ${fields.join(
+      ", "
+    )} WHERE ID_Utilisateurs = ?`;
+    values.push(id);
+
+    db.query(query, values, (err, data) => {
+      if (err) {
+        console.error("DB error:", err);
         return res.status(500).json({ error: "Erreur de la base de données" });
       }
-      console.log("update user : ", data);
       return res
         .status(200)
         .json({ message: "Utilisateur mis à jour avec succès" });
-    }
-  );
+    });
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    res.status(500).json({ error: "Erreur serveur inattendue" });
+  }
 };
