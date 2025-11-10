@@ -50,7 +50,7 @@ async function getToken(env = "production") {
 }
 
 export async function getApi(params) {
-  const { accessToken, urlRequete } = await getToken("production");
+  let { accessToken, urlRequete } = await getToken("production");
   try {
     const response = await axios.get(urlRequete, {
       params,
@@ -59,7 +59,6 @@ export async function getApi(params) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return response.data;
   } catch (error) {
     console.error("Erreur lors de l'appel à l'API:", error.message);
     throw error;
