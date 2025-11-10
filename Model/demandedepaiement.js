@@ -4,6 +4,7 @@ export const DemandePaiement = {
     "id_DemandePaiement",           
     "idClient",
     "idTiersFacturation", 
+    "idDemandePaiement",
     "numFactureTiers",
     "dateFacture",
     "idClient_numFactureTiers",

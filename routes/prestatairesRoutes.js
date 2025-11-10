@@ -12,7 +12,8 @@ const router = express.Router();
 
 //  Créer un prestataire
 router.post("/", createPrestataire);
-
+//Récuperation url/token
+router.get("/urssaf", getUrssafParams);
 //  Modifier un prestataire
 router.put("/", updatePrestataire);
 
@@ -21,8 +22,7 @@ router.get("/check", checkPrestataireExistence);
 
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
-//Récuperation url/token
-router.get("/urssaf", getUrssafParams);
+
 
 
 export default router;
