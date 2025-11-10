@@ -80,7 +80,7 @@ export async function postApi(data) {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "Authorization": `Bearer ${accessToken}`,
-        "recouv.origin.id": "819d80f5-fe9f-444b-bfcb-4f2ea9cf3d4c"
+        //"recouv.origin.id": "819d80f5-fe9f-444b-bfcb-4f2ea9cf3d4c"
  
       }
     });
