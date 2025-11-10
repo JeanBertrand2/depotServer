@@ -1,6 +1,40 @@
 import db from "../config/db.js";
 import { ParticulierModel } from "../Model/Particulier.js";
 
+export const getParticulier= (req, res) => {
+const query = `SELECT * FROM ${ParticulierModel.table}`;
+  db.query(query, (error, data) => {
+    if (error) {  
+      console.log("liste particulier error : ");   
+      return res.status(500).json({ error: "Erreur de la base de données" });
+    }
+    console.log("liste particulier : ",data);
+    return res.status(200).json(data);
+  });
+}
+export const updateParticulier= (data) => {
+  if(data && data != null)
+  {
+    const idClient = data.idClient;
+    const statutCode = data.statut.code;
+    const statutDescript = data.statut.description;
+   const statutEtat = data.statut.etat;
+  const query = `UPDATE ${ParticulierModel.table}
+              SET statutCode = '${statutCode}',
+              statutDescription = '${statutDescript}',
+              statutEtat = '${statutEtat}'
+              WHERE idClient = '${idClient}' `;
+  db.query(query, (error, data) => {
+    if (error) {  
+         
+      return "Erreur de la base de données" ;
+    }
+    return "Statut récupéré avec succès.";
+  });
+  }
+  else
+    return "Aucune réponse venant de urssaf" ;
+}
 export const createParticulier = (req, res) => {
   const body = req.body || {};
 
@@ -38,6 +72,9 @@ export const createParticulier = (req, res) => {
     codePays: ["adressePostale.codePays"],
     bic: ["coordonneeBancaire.bic"],
     iban: ["coordonneeBancaire.iban"],
+    IBAN: ["coordonneeBancaire.iban"],
+    libelleCommune_Adresse: ["adressePostale.libelleCommune"],
+    codeCommune_Adresse: ["adressePostale.codeCommune"],
     titulaire: ["coordonneeBancaire.titulaire"],
   };
 
