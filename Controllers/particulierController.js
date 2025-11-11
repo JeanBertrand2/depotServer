@@ -2,13 +2,26 @@ import db from "../config/db.js";
 import { ParticulierModel } from "../Model/Particulier.js";
 
 export const getParticulier= (req, res) => {
-const query = `SELECT * FROM ${ParticulierModel.table}`;
+  const urlParams = new URLSearchParams(req.originalUrl.split('?')[1]);
+  const params = Object.fromEntries(urlParams.entries());
+  const NomNaiss = params.nomNaissance;
+  const Prenom = params.prenoms;
+let query = `SELECT * FROM ${ParticulierModel.table}`;
+        let where ="";
+        if(NomNaiss !== "")
+        {
+            where = ` where nomNaissance like '%${NomNaiss}%' `;
+        }
+        if(Prenom !== "")
+        {
+            where +=(where ==="" ? " where " : " AND ")+ ` prenoms like '%${Prenom}%' `;
+        } 
+    query +=  where;   
   db.query(query, (error, data) => {
     if (error) {  
-      console.log("liste particulier error : ");   
+         
       return res.status(500).json({ error: "Erreur de la base de données" });
     }
-    console.log("liste particulier : ",data);
     return res.status(200).json(data);
   });
 }
