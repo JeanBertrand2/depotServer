@@ -8,6 +8,7 @@ import demandePRoutes from "./routes/demandedepaiementRoutes.js";
 import InputPRoutes from "./routes/InputPrestationRoutes.js";
 import donneesRoutes from "./routes/donneesRoutes.js";
 import urssafRoutes from "./routes/urssafRoutes.js";
+import donneesComboRoutes from "./routes/donneesCombo.js";
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -20,7 +21,7 @@ app.use("/demande", demandePRoutes);
 app.use("/Input", InputPRoutes);
 app.use("/api/majbdd", donneesRoutes);
 app.use("/api/urssaf", urssafRoutes);
-
+app.use("/api/donnees-combo", donneesComboRoutes);
 app.listen(2083, () => {
   console.log("Connected to backend! on port 2083");
 });
