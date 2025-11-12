@@ -12,72 +12,96 @@ import path from 'path';
              const sheetName = workbook.SheetNames[0];
              const worksheet = workbook.Sheets[sheetName];
              const jsonData = xlsx.utils.sheet_to_json(worksheet);
-            
+             const fileName = fichier.replace(".xlsx",'');
             //const [headers,setHeaders] = useState([])
             // Récupérer les en-têtes (clés du premier objet)
             let headers;
            // let stringHeader =[];
-            if(jsonData.length != 0)
+            if(jsonData.length !== 0)
             {
                 headers = Object.keys(jsonData[0]);
-                let h = 0;
+                
                // for (let h = 0; h < headers.length; h++) {
-                while(h < headers.length)
-                {
-                        
-                   if(h < 3 || h===12 || h===15 ) 
-                   {
-                        headers[h] = headers[h].replace(" ",'');
-                        h++;
-                   }
+               switch(fileName) {
                        
-                    else headers.splice(h,1);
-                }
-                   
-                    // stringHeader += (stringHeader =="" ? "" : ",") + headers[h].replace(" ",''); 
-                    // stringHeader.push[]                           
-               // }
+                    case "Communes":
+                        let h = headers.length-1;
+                        while(h > 0)
+                            {
+                                    
+                            if(h < 3 || h===12 || h===15 ) 
+                            {
+                                    headers[h] = headers[h].replace(" ",'');
+                                    
+                            }
+                                
+                                else headers.splice(h,1);
+                                h--;
+                            }                
+                    default:
+                       for (let h = 0; h < headers.length; h++) {
+                            headers[h] = headers[h].replace(" ",'');    
+                       }                 
+                } 
             }
                 
             for (let i = 0; i < jsonData.length; i++) {
                 let values = Object.values(jsonData[i])
-               
+               if(fileName ==="Communes")
+               {
+                    let m = values.length-1;
+                        while(m > 0)
+                            {
+                                    
+                            if(m < 3 || m===12 || m===15 ) 
+                            {                                  
+                                    
+                            }                               
+                            else values.splice(m,1);
+                                m--;
+                            } 
+               }
                         let stringValue ="";
                          //console.log('code = ',Object.keys(jsonData[0]),' valeur =  ', jsonData.);
-                         const fileName = fichier.replace(".xlsx",'');
+                         let val;
                         for (let h = 0; h < values.length; h++) {
-                            
+                            if(typeof values[h] === "string")
+                                val = values[h].replace("'","''");
+                            else
+                                val =  values[h];
                             switch(fileName) {
                                 case "CorrespondanceChampsDemandePaiement":
                                     if(h > 1) break;
-                                    stringValue +=(stringValue =="" ? "" : ",") +`"${values[h]}"`; 
+                                    stringValue +=(stringValue ==="" ? "" : ",") +`'${val}'`; 
                                     break;
                                 case "Communes":
                                         //  rubVerif = "CodeINSEE";
                                         //  rubVerifValue = values[0];
-                                        if(h < 3 || h===12 || h===15 ) 
-                                            stringValue +=(stringValue =="" ? "" : ",") +`"${values[h]}"`;
-                                        else break; 
+                                       // if(h < 3 || h===12 || h===15 ) 
+                                            stringValue +=(stringValue ==="" ? "" : ",") +`'${val}'`; 
+                                        //else break; 
                                         break;
-                                    default:
-                                        stringValue +=(stringValue =="" ? "" : ",") +`"${values[h]}"`; 
+                                    default:                                                          
+                                        stringValue +=(stringValue ==="" ? "" : ",") +`'${val}'`; 
                                         // code block
                                 }                               
                         }
                        
                         let nomFichier = fileName;
                         let rubVerif = headers[0];
-                        let rubVerifValue = `"${values[0]}"`;
+                        let rubVerifValue = `'${values[0]}'`;
                         switch(fileName) {
                             case "CorrespondanceChampsDemandePaiement":
                                 nomFichier = "CorrespoChampDmdPaiement";
                                 break;
                             case "DonneesDeBaseComboListe":
                                 nomFichier = "DonneesBaseCombo";
+                                rubVerif = "Code";
+                                rubVerifValue = `'${values[1]}'`;
                                 break;
                           case "Communes":
                                 rubVerif = "CodeINSEE";
-                                rubVerifValue = values[0];
+                                rubVerifValue = `'${values[0]}'`;
                                 break;
                             default:
                                 // code block
@@ -98,12 +122,8 @@ import path from 'path';
                                         if(results[0].count <= 0)
                                         {
                                             console.log('go 2 :',sel);
-                                            // result = true;
-                                            //  if (result != true)
-                                            //     {
-                                                    const q = `INSERT INTO ${nomFichier} (${headers}) VALUES (${stringValue})`;
-                                                    
-                                                
+                                            
+                                                    const q = `INSERT INTO ${nomFichier} (${headers}) VALUES (${stringValue})`;    
                                                     db.query(q,(err,data)=>{
                                                     if(err){
                                                     console.log('error ', q, err);
@@ -114,7 +134,35 @@ import path from 'path';
                                                         console.log('go insert :', q);
                                                     }
                                                     })
-                                              //  } 
+                                              
+                                        }
+                                        else
+                                        {
+                                           // const reqU = `INSERT INTO ${nomFichier} (${headers}) VALUES (${stringValue})`;    
+                                           //construction des colonnes à modifier 
+                                        let colsVal ="";
+                                        let val;
+                                           for (let k = 0; k < headers.length; k++) {
+                                                
+                                                  if(typeof values[k] === "string")
+                                                    val = values[k].replace("'","''");
+                                                    else
+                                                    val =  values[k];
+                                                colsVal +=(colsVal ==="" ? "" : ",") +` ${headers[k]} = '${val}'`; 
+                                                
+                                                
+                                             }
+                                             const reqU = `UPDATE ${nomFichier} SET ${colsVal} WHERE ${rubVerif} = ${rubVerifValue}`;    
+                                                    db.query(reqU,(err,data)=>{
+                                                    if(err){
+                                                    console.log('error update', reqU, err);
+                                                        //return res.json(err)
+                                                    } 
+                                                    else 
+                                                    {
+                                                        console.log('go update :', reqU);
+                                                    }
+                                                    })
                                         }
                                     }
                                 })

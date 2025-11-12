@@ -7,6 +7,7 @@ import prestatairesRoutes from "./routes/prestatairesRoutes.js";
 import demandePRoutes from "./routes/demandedepaiementRoutes.js";
 import InputPRoutes from "./routes/InputPrestationRoutes.js";
 import donneesRoutes from "./routes/donneesRoutes.js";
+import utilisateursRoutes from "./routes/utilisateurRoutes.js";
 import urssafRoutes from "./routes/urssafRoutes.js";
 import donneesComboRoutes from "./routes/donneesCombo.js";
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors());
 
 app.use("/intervenants", intervenantRoutes);
 app.use("/particuliers", particuliersRoutes);
+app.use("/utilisateurs", utilisateursRoutes);
 app.use("/meta", metaRoutes);
 app.use("/prestataires", prestatairesRoutes);
 app.use("/demande", demandePRoutes);
