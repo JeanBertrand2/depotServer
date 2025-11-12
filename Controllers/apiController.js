@@ -79,16 +79,9 @@ export async function postApi(data) {
     const response = await axios.post(fullUrl, body, {
       headers: {
         "Content-Type": "application/json",
-<<<<<<< HEAD
-        "Accept": "application/json",
-        "Authorization": `Bearer ${accessToken}`,
-        
-      }
-=======
         Accept: "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
->>>>>>> 369550efee706e0fa2a5d775d73fe573f17c37b3
     });
     console.log(
       "Réponse brute URSSAF :",
