@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllDonneesBaseCombo } from "../Controller/DonneeBaseComboController.js";
+import { getAllDonneesBaseCombo } from "../Controllers/DonneeBaseComboController";
 
 const router = express.Router();
 
