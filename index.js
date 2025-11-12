@@ -9,7 +9,7 @@ import InputPRoutes from "./routes/InputPrestationRoutes.js";
 import donneesRoutes from "./routes/donneesRoutes.js";
 import utilisateursRoutes from "./routes/utilisateurRoutes.js";
 import urssafRoutes from "./routes/urssafRoutes.js";
-import donneesComboRoutes from "./routes/donneesCombo.js";
+import donneesComboRoutes from "./routes/donneeCombo.js";
 const app = express();
 app.use(express.json());
 app.use(cors());
