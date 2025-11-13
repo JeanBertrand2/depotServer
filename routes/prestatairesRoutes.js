@@ -18,7 +18,7 @@ router.put("/", updatePrestataire);
 
 // Vérifier s’il existe au moins un prestataire
 router.get("/check", checkPrestataireExistence);
-router.get("/urssaf", getUrssafParams);
+
 
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
