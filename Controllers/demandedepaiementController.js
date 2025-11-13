@@ -36,7 +36,7 @@ export const rechercherPaiements = (req, res) => {
   console.log("Requête reçue :", req.body);
 
   let sql = `
-    SELECT 
+    SELECT
      
       dp.idDemandePaiement ,
       dp.dateFacture AS datefacture,
@@ -377,23 +377,23 @@ export const upsertDemandePaiement = async (req, res) => {
 
     if (existingRows.length > 0) {
       const result = await queryAsync(
-        `UPDATE DemandePaiement SET 
-          idDemandePaiement = ?, 
-          idClient = ?, 
-          idTiersFacturation = ?, 
-          dateFacture = ?, 
-          dateDebutEmploi = ?, 
-          dateFinEmploi = ?, 
-          mntAcompte = ?, 
-          dateVersementAcompte = ?, 
-          mntFactureTTC = ?, 
-          mntFactureHT = ?, 
-          statut = ?, 
-          statutlibelle = ?, 
-          inforejet = ?, 
-          inforejetcommentaire = ?, 
-          mntVirement = ?, 
-          dateVirement = ?, 
+        `UPDATE DemandePaiement SET
+          idDemandePaiement = ?,
+          idClient = ?,
+          idTiersFacturation = ?,
+          dateFacture = ?,
+          dateDebutEmploi = ?,
+          dateFinEmploi = ?,
+          mntAcompte = ?,
+          dateVersementAcompte = ?,
+          mntFactureTTC = ?,
+          mntFactureHT = ?,
+          statut = ?,
+          statutlibelle = ?,
+          inforejet = ?,
+          inforejetcommentaire = ?,
+          mntVirement = ?,
+          dateVirement = ?,
           dateHeureModification = ?
         WHERE numFactureTiers = ?`,
         [
