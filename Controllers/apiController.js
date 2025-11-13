@@ -1,6 +1,6 @@
 import axios from "axios";
 import querystring from "querystring";
-
+let urlreq;
 async function getToken(env = "sandbox") {
   try {
     const { data } = await axios.get(
@@ -14,7 +14,7 @@ async function getToken(env = "sandbox") {
       );
 
     const { clientID, clientSecret, scope, urlToken, urlRequete } = config;
-
+     urlreq = urlRequete;
     const response = await axios.post(
       urlToken,
       querystring.stringify({
@@ -49,22 +49,26 @@ async function getToken(env = "sandbox") {
   }
 }
 
-export async function getApi(params) {
-  let { accessToken, urlRequete } = await getToken("sandbox");
+export async function getApi(uriMethode, params) {
+  const { accessToken } = await getToken();
   try {
-    const response = await axios.get(urlRequete, {
+    const apiUrl = urlreq + uriMethode;
+    const response = await axios.get(apiUrl, {
       params,
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    console.log("reponse = ",response.data);
+    return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'appel à l'API:", error.message);
+    console.error(
+      "Erreur lors de l'appel à l'API:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 }
-
 export async function postApi(data) {
   console.log(" postApi() appelée avec :", data);
 
@@ -98,3 +102,4 @@ export async function postApi(data) {
     throw error;
   }
 }
+
