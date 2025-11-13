@@ -2,27 +2,34 @@ import db from "../config/db.js";
 import { DemandePaiement } from "../Model/demandedepaiement.js";
 import { postApi } from "./apiController.js";
 
-
 //  Créer une nouvelle demande de paiement
 export const createDemandePaiement = (req, res) => {
   const data = req.body || {};
 
   const columns = Object.keys(data);
 
-  const values = columns.map(col => data[col] ?? null);
+  const values = columns.map((col) => data[col] ?? null);
 
   const placeholders = "(" + columns.map(() => "?").join(",") + ")";
-  const sql = `INSERT INTO ${DemandePaiement.table} (${columns.join(",")}) VALUES ${placeholders}`;
+  const sql = `INSERT INTO ${DemandePaiement.table} (${columns.join(
+    ","
+  )}) VALUES ${placeholders}`;
 
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error("Erreur lors de l'ajout de la demande de paiement :", err);
-      return res.status(500).json({ error: "Erreur base de données", details: err.message });
+      return res
+        .status(500)
+        .json({ error: "Erreur base de données", details: err.message });
     }
-    return res.status(201).json({ message: "Demande de paiement ajoutée avec succès", id: result.insertId });
+    return res
+      .status(201)
+      .json({
+        message: "Demande de paiement ajoutée avec succès",
+        id: result.insertId,
+      });
   });
 };
-
 
 export const rechercherPaiements = (req, res) => {
   const { dateDebut, dateFin, factures } = req.body;
@@ -69,11 +76,13 @@ export const rechercherPaiements = (req, res) => {
   if (factures && typeof factures === "string" && factures.trim() !== "") {
     const factureList = factures
       .split(",")
-      .map(f => f.trim())
-      .filter(f => f !== "");
+      .map((f) => f.trim())
+      .filter((f) => f !== "");
 
     if (factureList.length > 0) {
-      sql += ` AND dp.numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
+      sql += ` AND dp.numFactureTiers IN (${factureList
+        .map(() => "?")
+        .join(",")})`;
       params.push(...factureList);
     }
   }
@@ -81,34 +90,38 @@ export const rechercherPaiements = (req, res) => {
   db.query(sql, params, (err, results) => {
     if (err) {
       console.error("Erreur SQL :", err);
-      return res.status(500).json({ error: "Erreur serveur", details: err.message });
+      return res
+        .status(500)
+        .json({ error: "Erreur serveur", details: err.message });
     }
-console.log("Résultat SQL :", results);
+    console.log("Résultat SQL :", results);
 
     res.json({
       total: results.length,
-      data: results
+      data: results,
     });
   });
 };
 const normalizeMontant = (val) => {
   const num = parseFloat(val);
-  return isNaN(num) ? 0.00 : num;
+  return isNaN(num) ? 0.0 : num;
 };
 
 export const interrogerPaiements = async (req, res) => {
   const { dateDebut, dateFin, factures } = req.body;
   const factureList = (factures || "")
     .split(",")
-    .map(f => f.trim())
-    .filter(f => f !== "");
+    .map((f) => f.trim())
+    .filter((f) => f !== "");
 
   const results = [];
 
   for (const numFacture of factureList) {
     try {
       // Appel à l’API URSSAF (à adapter selon ton endpoint)
-      const apiResponse = await fetch(`https://api.urssaf.fr/paiement/${numFacture}`);
+      const apiResponse = await fetch(
+        `https://api.urssaf.fr/paiement/${numFacture}`
+      );
       const data = await apiResponse.json();
 
       const dp = {
@@ -129,7 +142,7 @@ export const interrogerPaiements = async (req, res) => {
         inforejetcommentaire: data.infoRejet.commentaire,
         mntVirement: normalizeMontant(data.infoVirement.mntVirement),
         dateVirement: data.infoVirement.p_dateVirement,
-        dateHeureModification: new Date()
+        dateHeureModification: new Date(),
       };
 
       // Vérifie si la facture existe déjà
@@ -138,10 +151,11 @@ export const interrogerPaiements = async (req, res) => {
         [numFacture]
       );
 
-
       if (existing.length > 0) {
-        await db.query("UPDATE DemandePaiement SET ? WHERE numFactureTiers = ?", [dp, numFacture]);
-
+        await db.query(
+          "UPDATE DemandePaiement SET ? WHERE numFactureTiers = ?",
+          [dp, numFacture]
+        );
       } else {
         await db.query("INSERT INTO DemandePaiement SET ?", [dp]);
       }
@@ -156,25 +170,16 @@ export const interrogerPaiements = async (req, res) => {
 };
 // Récupérer la liste des factures sur une période
 export const recupererListeFacturePeriode = (req, res) => {
-  const {
-    gf_sListeFacture,
-    gf_dDatedebut,
-    gf_dDateFin,
-    gf_sStatutAExclure
-  } = req.body;
-
-  
-
+  const { gf_sListeFacture, gf_dDatedebut, gf_dDateFin, gf_sStatutAExclure } =
+    req.body;
 
   let sql = `SELECT idDemandePaiement,numFactureTiers FROM DemandePaiement WHERE numFactureTiers <> ''`;
   const params = [];
 
   if (Array.isArray(gf_sListeFacture) && gf_sListeFacture.length > 0) {
-
     const factureList = gf_sListeFacture
-      .map(f => f.trim())
-      .filter(f => f !== "");
-
+      .map((f) => f.trim())
+      .filter((f) => f !== "");
 
     sql += ` AND numFactureTiers IN (${factureList.map(() => "?").join(",")})`;
     params.push(...factureList);
@@ -196,23 +201,27 @@ export const recupererListeFacturePeriode = (req, res) => {
   db.query(sql, params, (err, results) => {
     if (err) {
       console.error("Erreur SQL :", err);
-      return res.status(500).json({ error: "Erreur SQL", details: err.message });
+      return res
+        .status(500)
+        .json({ error: "Erreur SQL", details: err.message });
     }
 
     res.json({
       total: results.length,
-      gtabListeFacturePeriode: results
+      gtabListeFacturePeriode: results,
     });
   });
 };
 
 export const envoyerVersUrssaf = async (req, res) => {
   console.log("Requête reçue :", req.body);
-  
+
   const { payload } = req.body;
   console.log(" Payload reçu dans envoyerVersUrssaf :", payload);
   if (!payload || !payload.methode) {
-    return res.status(400).json({ error: "Méthode URSSAF manquante dans le payload" });
+    return res
+      .status(400)
+      .json({ error: "Méthode URSSAF manquante dans le payload" });
   }
 
   try {
@@ -224,7 +233,7 @@ export const envoyerVersUrssaf = async (req, res) => {
     console.error("Erreur URSSAF :", err.message);
     res.status(500).json({ error: "Échec de l'envoi vers URSSAF" });
   }
-}; 
+};
 
 export const updateDemandePaiement = (req, res) => {
   const data = req.body || {};
@@ -235,72 +244,89 @@ export const updateDemandePaiement = (req, res) => {
   }
 
   // Vérifier que la demande existe
-  db.query("SELECT 1 FROM DemandePaiement WHERE id_DemandePaiement = ?", [id], (err, rows) => {
-    if (err) {
-      console.error("Erreur SQL lors de la vérification :", err);
-      return res.status(500).json({ error: "Erreur base de données", details: err.message });
-    }
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "Demande de paiement introuvable" });
-    }
-
-    // Aplatir les objets imbriqués
-    const flatData = {
-      idDemandePaiement: data.idDemandePaiement,
-      idClient: data.idClient,
-      idTiersFacturation: data.idTiersFacturation,
-      numFactureTiers: data.numFactureTiers,
-      dateFacture: data.dateFacture,
-      dateDebutEmploi: data.dateDebutEmploi,
-      dateFinEmploi: data.dateFinEmploi,
-      mntAcompte: data.mntAcompte,
-      dateVersementAcompte: data.dateVersementAcompte,
-      mntFactureTTC: data.mntFactureTTC,
-      mntFactureHT: data.mntFactureHT,
-      statut: data.statut?.code || null,
-      statutlibelle: data.statut?.libelle || null,
-      inforejet: data.infoRejet?.code || null,
-      inforejetcommentaire: data.infoRejet?.commentaire || null,
-      mntVirement: data.infoVirement?.mntVirement || null,
-      dateVirement: data.infoVirement?.dateVirement || null,
-      dateHeureModification: new Date()
-    };
-
-    const columns = Object.keys(flatData);
-    const values = columns.map(col => flatData[col]);
-    const setClause = columns.map(col => `${col} = ?`).join(", ");
-    const sql = `UPDATE DemandePaiement SET ${setClause} WHERE id_DemandePaiement = ?`;
-
-    db.query(sql, [...values, id], (err, result) => {
+  db.query(
+    "SELECT 1 FROM DemandePaiement WHERE id_DemandePaiement = ?",
+    [id],
+    (err, rows) => {
       if (err) {
-        console.error("Erreur lors de la modification de la demande de paiement :", err);
-        return res.status(500).json({ error: "Erreur base de données", details: err.message });
+        console.error("Erreur SQL lors de la vérification :", err);
+        return res
+          .status(500)
+          .json({ error: "Erreur base de données", details: err.message });
       }
 
-      return res.status(200).json({ message: "Demande de paiement modifiée avec succès", id_DemandePaiement: id });
-    });
-  });
+      if (rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "Demande de paiement introuvable" });
+      }
+
+      // Aplatir les objets imbriqués
+      const flatData = {
+        idDemandePaiement: data.idDemandePaiement,
+        idClient: data.idClient,
+        idTiersFacturation: data.idTiersFacturation,
+        numFactureTiers: data.numFactureTiers,
+        dateFacture: data.dateFacture,
+        dateDebutEmploi: data.dateDebutEmploi,
+        dateFinEmploi: data.dateFinEmploi,
+        mntAcompte: data.mntAcompte,
+        dateVersementAcompte: data.dateVersementAcompte,
+        mntFactureTTC: data.mntFactureTTC,
+        mntFactureHT: data.mntFactureHT,
+        statut: data.statut?.code || null,
+        statutlibelle: data.statut?.libelle || null,
+        inforejet: data.infoRejet?.code || null,
+        inforejetcommentaire: data.infoRejet?.commentaire || null,
+        mntVirement: data.infoVirement?.mntVirement || null,
+        dateVirement: data.infoVirement?.dateVirement || null,
+        dateHeureModification: new Date(),
+      };
+
+      const columns = Object.keys(flatData);
+      const values = columns.map((col) => flatData[col]);
+      const setClause = columns.map((col) => `${col} = ?`).join(", ");
+      const sql = `UPDATE DemandePaiement SET ${setClause} WHERE id_DemandePaiement = ?`;
+
+      db.query(sql, [...values, id], (err, result) => {
+        if (err) {
+          console.error(
+            "Erreur lors de la modification de la demande de paiement :",
+            err
+          );
+          return res
+            .status(500)
+            .json({ error: "Erreur base de données", details: err.message });
+        }
+
+        return res
+          .status(200)
+          .json({
+            message: "Demande de paiement modifiée avec succès",
+            id_DemandePaiement: id,
+          });
+      });
+    }
+  );
 };
 
 export const interrogerViaBackend = async (req, res) => {
   try {
-    const payload = req.body; 
+    const payload = req.body;
 
     console.log("Payload reçu dans interrogerViaBackend :", payload);
 
-    const result = await postApi(payload); 
+    const result = await postApi(payload);
 
     res.json(result);
   } catch (err) {
     console.error("Erreur dans interrogerViaBackend :", err.message);
     res.status(500).json({
       error: "Erreur lors de l'appel à URSSAF",
-      details: err.message
+      details: err.message,
     });
   }
 };
-
 
 // Fonction utilitaire pour rendre les requêtes MySQL compatibles avec async/await
 const queryAsync = (sql, values) => {
@@ -314,10 +340,10 @@ const queryAsync = (sql, values) => {
 
 export const upsertDemandePaiement = async (req, res) => {
   const data = req.body;
-  const numFacture = (data.numFactureTiers || '').trim().toUpperCase();
+  const numFacture = (data.numFactureTiers || "").trim().toUpperCase();
 
   if (!numFacture) {
-    return res.status(400).json({ error: 'numFactureTiers manquant' });
+    return res.status(400).json({ error: "numFactureTiers manquant" });
   }
 
   const dp = {
@@ -338,16 +364,16 @@ export const upsertDemandePaiement = async (req, res) => {
     inforejetcommentaire: data.infoRejet?.commentaire,
     mntVirement: data.infoVirement?.mntVirement,
     dateVirement: data.infoVirement?.dateVirement,
-    dateHeureModification: new Date()
+    dateHeureModification: new Date(),
   };
 
   try {
     const existingRows = await queryAsync(
-      'SELECT * FROM DemandePaiement WHERE numFactureTiers = ?',
+      "SELECT * FROM DemandePaiement WHERE numFactureTiers = ?",
       [numFacture]
     );
 
-    console.log('Résultat SELECT :', existingRows);
+    console.log("Résultat SELECT :", existingRows);
 
     if (existingRows.length > 0) {
       const result = await queryAsync(
@@ -388,24 +414,33 @@ export const upsertDemandePaiement = async (req, res) => {
           dp.mntVirement,
           dp.dateVirement,
           dp.dateHeureModification,
-          numFacture
+          numFacture,
         ]
       );
 
-      console.log('Lignes modifiées :', result.affectedRows);
+      console.log("Lignes modifiées :", result.affectedRows);
 
       if (result.affectedRows > 0) {
-        return res.json({ message: 'Demande modifiée', facture: numFacture });
+        return res.json({ message: "Demande modifiée", facture: numFacture });
       } else {
-        return res.status(200).json({ message: 'Aucune modification nécessaire', facture: numFacture });
+        return res
+          .status(200)
+          .json({
+            message: "Aucune modification nécessaire",
+            facture: numFacture,
+          });
       }
     } else {
       dp.dateHeureCreation = new Date();
-      await queryAsync('INSERT INTO DemandePaiement SET ?', [dp]);
-      return res.status(201).json({ message: 'Demande ajoutée', facture: numFacture });
+      await queryAsync("INSERT INTO DemandePaiement SET ?", [dp]);
+      return res
+        .status(201)
+        .json({ message: "Demande ajoutée", facture: numFacture });
     }
   } catch (err) {
-    console.error('Erreur upsert :', err.message);
-    return res.status(500).json({ error: 'Erreur serveur', details: err.message });
+    console.error("Erreur upsert :", err.message);
+    return res
+      .status(500)
+      .json({ error: "Erreur serveur", details: err.message });
   }
 };
