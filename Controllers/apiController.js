@@ -67,6 +67,7 @@ export async function getApi(params) {
 
 export async function postApi(data) {
   console.log(" postApi() appelée avec :", data);
+
   const { accessToken, urlRequete } = await getToken("sandbox");
   const { methode, ...body } = data;
   const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
