@@ -1,7 +1,7 @@
 import axios from "axios";
 import querystring from "querystring";
  
-async function getToken(env = "production") {
+async function getToken(env = "sandbox") {
   try {
     const { data } = await axios.get(
       "http://localhost:2083/prestataires/urssaf"
@@ -12,9 +12,10 @@ async function getToken(env = "production") {
       throw new Error(
         `Configuration URSSAF introuvable pour l'environnement ${env}`
       );
- 
+      
+
     const { clientID, clientSecret, scope, urlToken, urlRequete } = config;
- 
+      
     const response = await axios.post(
       urlToken,
       querystring.stringify({
@@ -108,7 +109,7 @@ async function getToken(env = "production") {
 }*/}
  
 export async function getApi(params) {
-  let { accessToken, urlRequete } = await getToken("production");
+  let { accessToken, urlRequete } = await getToken("sandbox");
   try {
     const response = await axios.get(urlRequete, {
       params,
@@ -126,7 +127,7 @@ export async function getApi(params) {
 export async function postApi(data) {
   console.log(" postApi() appelée avec :", data);
  
-  const { accessToken, urlRequete } = await getToken("production");
+  const { accessToken, urlRequete } = await getToken("sandbox");
   const { methode, ...body } = data;
   const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
  
