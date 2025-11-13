@@ -31,10 +31,16 @@ export const updateParticulier= (data) => {
     const idClient = data.idClient;
     const statutCode = data.statut.code;
     const statutDescript = data.statut.description;
+    const nomNaissance = data.nomNaissance;
+     const nomUsage = data.nomUsage;
+     const prenoms = data.prenoms;
    const statutEtat = data.statut.etat;
   const query = `UPDATE ${ParticulierModel.table}
               SET statutCode = '${statutCode}',
               statutDescription = '${statutDescript}',
+              nomNaissance = '${nomNaissance}',
+              nomUsage = '${nomUsage}',
+              prenoms = '${prenoms}',
               statutEtat = '${statutEtat}'
               WHERE idClient = '${idClient}' `;
   db.query(query, (error, data) => {
