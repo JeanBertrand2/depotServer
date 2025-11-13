@@ -1,7 +1,7 @@
 import axios from "axios";
 import querystring from "querystring";
  
-{/*async function getToken(env = "production") {
+async function getToken(env = "production") {
   try {
     const { data } = await axios.get(
       "http://localhost:2083/prestataires/urssaf"
@@ -47,8 +47,8 @@ import querystring from "querystring";
     }
     throw error;
   }
-}*/}
-export async function getToken(env = "production") {
+}
+{/*export async function getToken(env = "production") {
   try {
     const { data } = await axios.get("http://localhost:2083/prestataires/urssaf");
 
@@ -105,7 +105,7 @@ export async function getToken(env = "production") {
     }
     throw error;
   }
-}
+}*/}
  
 export async function getApi(params) {
   let { accessToken, urlRequete } = await getToken("production");
