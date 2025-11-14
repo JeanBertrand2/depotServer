@@ -6,7 +6,7 @@ export const getParticulier = (req, res) => {
   const params = Object.fromEntries(urlParams.entries());
   const NomNaiss = params.nomNaissance;
   const Prenom = params.prenoms;
-  let query = `SELECT * FROM ${ParticulierModel.table}`;
+  let query = `SELECT * FROM particulier`;
   let where = "";
   if (NomNaiss !== "") {
     where = ` where nomNaissance like '%${NomNaiss}%' `;
