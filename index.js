@@ -10,9 +10,16 @@ import donneesRoutes from "./routes/donneesRoutes.js";
 import utilisateursRoutes from "./routes/utilisateurRoutes.js";
 import urssafRoutes from "./routes/urssafRoutes.js";
 import donneesComboRoutes from "./routes/donneeCombo.js";
+import cookieSession from "cookie-session";
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+app.use(cookieSession({
+  name:"SS_VERSION",
+  secret:"34KJNUR89"
+})
+);
 
 app.use("/intervenants", intervenantRoutes);
 app.use("/particuliers", particuliersRoutes);
@@ -24,6 +31,7 @@ app.use("/Input", InputPRoutes);
 app.use("/api/majbdd", donneesRoutes);
 app.use("/api/urssaf", urssafRoutes);
 app.use("/api/donnees-combo", donneesComboRoutes);
+app.use("/session", sessionRoute);
 
 app.listen(2083, () => {
   console.log("Connected to backend! on port 2083");
