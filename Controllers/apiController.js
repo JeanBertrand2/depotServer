@@ -14,7 +14,7 @@ async function getToken(env = "sandbox") {
       );
 
     const { clientID, clientSecret, scope, urlToken, urlRequete } = config;
-     urlreq = urlRequete;
+    urlreq = urlRequete;
     const response = await axios.post(
       urlToken,
       querystring.stringify({
@@ -59,7 +59,7 @@ export async function getApi(uriMethode, params) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("reponse = ",response.data);
+    console.log("reponse = ", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -102,4 +102,3 @@ export async function postApi(data) {
     throw error;
   }
 }
-

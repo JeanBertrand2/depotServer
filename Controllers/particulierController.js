@@ -1,59 +1,63 @@
 import db from "../config/db.js";
 import { ParticulierModel } from "../Model/Particulier.js";
 
-export const getParticulier= (req, res) => {
-  const urlParams = new URLSearchParams(req.originalUrl.split('?')[1]);
+export const getParticulier = (req, res) => {
+  const urlParams = new URLSearchParams(req.originalUrl.split("?")[1]);
   const params = Object.fromEntries(urlParams.entries());
   const NomNaiss = params.nomNaissance;
   const Prenom = params.prenoms;
-let query = `SELECT * FROM ${ParticulierModel.table}`;
-        let where ="";
-        if(NomNaiss !== "")
-        {
-            where = ` where nomNaissance like '%${NomNaiss}%' `;
-        }
-        if(Prenom !== "")
-        {
-            where +=(where ==="" ? " where " : " AND ")+ ` prenoms like '%${Prenom}%' `;
-        } 
-    query +=  where;   
+  let query = `SELECT * FROM ${ParticulierModel.table}`;
+  let where = "";
+  if (NomNaiss !== "") {
+    where = ` where nomNaissance like '%${NomNaiss}%' `;
+  }
+  if (Prenom !== "") {
+    where +=
+      (where === "" ? " where " : " AND ") + ` prenoms like '%${Prenom}%' `;
+  }
+  query += where;
   db.query(query, (error, data) => {
-    if (error) {  
-         
+    if (error) {
       return res.status(500).json({ error: "Erreur de la base de données" });
     }
     return res.status(200).json(data);
   });
-}
-export const updateParticulier= (data) => {
-  if(data && data != null)
-  {
-    const idClient = data.idClient;
-    const statutCode = data.statut.code;
-    const statutDescript = data.statut.description;
-    const nomNaissance = data.nomNaissance;
-     const nomUsage = data.nomUsage;
-     const prenoms = data.prenoms;
-   const statutEtat = data.statut.etat;
-  const query = `UPDATE ${ParticulierModel.table}
-              SET statutCode = '${statutCode}',
-              statutDescription = '${statutDescript}',
-              nomNaissance = '${nomNaissance}',
-              nomUsage = '${nomUsage}',
-              prenoms = '${prenoms}',
-              statutEtat = '${statutEtat}'
-              WHERE idClient = '${idClient}' `;
-  db.query(query, (error, data) => {
-    if (error) {  
-         
-      return "Erreur de la base de données" ;
+};
+export const updateParticulier = async (data) => {
+  return new Promise((resolve, reject) => {
+    if (data && data != null) {
+      const idClient = data.idClient;
+      const statutCode = data.statut.code;
+      const statutDescript = data.statut.description;
+      const statutEtat = data.statut.etat;
+
+      const query = `UPDATE ${ParticulierModel.table}
+                SET statutCode = ?,
+                statutDescription = ?,
+                statutEtat = ?
+                WHERE idClient = ?`;
+
+      db.query(
+        query,
+        [statutCode, statutDescript, statutEtat, idClient],
+        (error, result) => {
+          if (error) {
+            console.error("Erreur de la base de données:", error);
+            reject(error);
+          } else {
+            console.log(
+              "Statut mis à jour avec succès pour idClient:",
+              idClient
+            );
+            resolve({ success: true, message: "Statut récupéré avec succès." });
+          }
+        }
+      );
+    } else {
+      reject(new Error("Aucune réponse venant de urssaf"));
     }
-    return "Statut récupéré avec succès.";
   });
-  }
-  else
-    return "Aucune réponse venant de urssaf" ;
-}
+};
 export const createParticulier = (req, res) => {
   const body = req.body || {};
 
