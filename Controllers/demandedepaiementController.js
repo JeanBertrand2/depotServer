@@ -1,7 +1,7 @@
 import db from "../config/db.js";
 import { DemandePaiement } from "../Model/demandedepaiement.js";
 import { postApi } from "./apiController.js";
-
+import { postApiLegacy  } from "./apiController.js";
 //  Créer une nouvelle demande de paiement
 export const createDemandePaiement = (req, res) => {
   const data = req.body || {};
