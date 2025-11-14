@@ -69,7 +69,7 @@ export async function getApi(uriMethode, params) {
     throw error;
   }
 }
-export async function postApi(data) {
+export async function postApiLegacy(data) {
   console.log(" postApi() appelée avec :", data);
 
   const { accessToken, urlRequete } = await getToken("sandbox");
@@ -102,4 +102,32 @@ export async function postApi(data) {
     throw error;
   }
 }
+export async function postApi(data) {
+  console.log("postApi() appelée avec :", data);
+
+  const { accessToken, urlRequete } = await getToken("sandbox");
+  const { methode, data: payload } = data; 
+  const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
+
+  console.log("Appel URSSAF vers :", fullUrl);
+  console.log("Payload transmis :", JSON.stringify(payload, null, 2));
+
+  try {
+    const response = await axios.post(fullUrl, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    console.log("Réponse brute URSSAF :", JSON.stringify(response.data, null, 2));
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de l'appel à l'API URSSAF :", error.response?.data || error.message);
+    console.error("Code HTTP :", error.response?.status);
+    console.error("Headers :", error.response?.headers);
+    throw error;
+  }
+}
+
 

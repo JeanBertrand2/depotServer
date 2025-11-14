@@ -5,6 +5,7 @@ import {
   checkPrestataireExistence,
   getPrestataireById,
   getUrssafParams,
+  getIdentifiantAPI,
 } from "../Controllers/prestatairesController.js";
 
 const router = express.Router();
@@ -23,6 +24,8 @@ router.get("/check", checkPrestataireExistence);
 // Récupérer un prestataire par ID
 router.get("/:id", getPrestataireById);
 
+// Récupérer l'identifiant API (SIRET/URSSAF attendu par l'API externe)
+router.get("/identifiant", getIdentifiantAPI);
 
 // Récupération url/token
 

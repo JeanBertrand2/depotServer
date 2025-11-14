@@ -135,19 +135,19 @@ export const getUrssafParams = (req, res) => {
     });
   });
 }; 
-{/*export const getUrssafParams = (req, res) => {
+export const getIdentifiantAPI = (req, res) => {
   const sql = `
-    SELECT 
-      ClientIDProduction, ClientSecretProduction, ScopeProduction, UrlTokenProduction, UrlRequeteProduction,
-      ClientIDSandBox, ClientSecretSandBox, ScopeSandBox, UrlTokenSandBox, UrlRequeteSandBox
+    SELECT IdentifiantAPI
     FROM ${PrestatairesModel.table}
     LIMIT 1
   `;
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error("Erreur lors de la récupération des paramètres URSSAF :", err);
-      return res.status(500).json({ error: "Erreur base de données", details: err.message });
+      console.error("Erreur lors de la récupération de l'IdentifiantAPI :", err);
+      return res
+        .status(500)
+        .json({ error: "Erreur base de données", details: err.message });
     }
 
     if (results.length === 0) {
@@ -155,46 +155,9 @@ export const getUrssafParams = (req, res) => {
     }
 
     const row = results[0];
-
-    const productionFilled = [
-      row.ClientIDProduction,
-      row.ClientSecretProduction,
-      row.ScopeProduction,
-      row.UrlTokenProduction,
-      row.UrlRequeteProduction,
-    ].some(val => val && val.trim() !== "");
-
-    const sandboxFilled = [
-      row.ClientIDSandBox,
-      row.ClientSecretSandBox,
-      row.ScopeSandBox,
-      row.UrlTokenSandBox,
-      row.UrlRequeteSandBox,
-    ].some(val => val && val.trim() !== "");
-
-    let mode = "";
-    if (productionFilled && !sandboxFilled) {
-      mode = "production";
-    } else if (sandboxFilled && !productionFilled) {
-      mode = "sandbox";
-    }
-
     res.json({
-      mode, 
-      production: {
-        clientID: row.ClientIDProduction,
-        clientSecret: row.ClientSecretProduction,
-        scope: row.ScopeProduction,
-        urlToken: row.UrlTokenProduction,
-        urlRequete: row.UrlRequeteProduction,
-      },
-      sandbox: {
-        clientID: row.ClientIDSandBox,
-        clientSecret: row.ClientSecretSandBox,
-        scope: row.ScopeSandBox,
-        urlToken: row.UrlTokenSandBox,
-        urlRequete: row.UrlRequeteSandBox,
-      },
+      identifiantAPI: row.IdentifiantAPI,
     });
   });
-}; */}
+};
+

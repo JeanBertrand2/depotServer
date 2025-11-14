@@ -214,7 +214,7 @@ export const recupererListeFacturePeriode = (req, res) => {
 };
 
 export const envoyerVersUrssaf = async (req, res) => {
-  console.log("Requête reçue :", req.body);
+  console.log("Requête reçue 111:", req.body);
 
   const { payload } = req.body;
   console.log(" Payload reçu dans envoyerVersUrssaf :", payload);
@@ -234,6 +234,9 @@ export const envoyerVersUrssaf = async (req, res) => {
     res.status(500).json({ error: "Échec de l'envoi vers URSSAF" });
   }
 };
+
+
+
 
 export const updateDemandePaiement = (req, res) => {
   const data = req.body || {};
@@ -316,7 +319,7 @@ export const interrogerViaBackend = async (req, res) => {
 
     console.log("Payload reçu dans interrogerViaBackend :", payload);
 
-    const result = await postApi(payload);
+    const result = await postApiLegacy(payload);
 
     res.json(result);
   } catch (err) {
