@@ -49,16 +49,17 @@ async function getToken(env = "sandbox") {
   }
 }
 
-export async function getApi(params) {
+export async function getApi(url, params) {
   let { accessToken, urlRequete } = await getToken("sandbox");
   try {
-    const response = await axios.get(urlRequete, {
+    const response = await axios.get(`${urlRequete}${url}`, {
       params,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
       },
     });
+    return response.data;
   } catch (error) {
     console.error("Erreur lors de l'appel à l'API:", error.message);
     throw error;
