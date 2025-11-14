@@ -1,5 +1,5 @@
 import express from "express";
-import { postApi } from "../Controllers/apiController.js";
+import { getApi, postApi } from "../Controllers/apiController.js";
 import { updateParticulier } from "../Controllers/particulierController.js";
 
 const router = express.Router();
@@ -19,14 +19,14 @@ router.post("/getStatut", async (req, res) => {
   // const idClient = params.idClient;
   const params = req.body.params;
   const url = req.body.url;
-  console.log("url = ",url);
-   try {
-     const result = await getApi(url,params);
-     if(result!=null)
-     {
+  console.log("url = ", url);
+  try {
+    const result = await getApi(url, params);
+    if (result != null) {
       updateParticulier(result);
-     }
+    }
     res.json(result);
+    return res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
