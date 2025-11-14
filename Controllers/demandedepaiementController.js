@@ -226,7 +226,7 @@ export const envoyerVersUrssaf = async (req, res) => {
 
   try {
     console.log(" Appel postApi avec :", payload);
-    const result = await postApi(payload);
+    const result = await postApiLegacy(payload);
 
     res.json({ success: true, result });
   } catch (err) {
@@ -319,7 +319,7 @@ export const interrogerViaBackend = async (req, res) => {
 
     console.log("Payload reçu dans interrogerViaBackend :", payload);
 
-    const result = await postApiLegacy(payload);
+    const result = await postApi(payload);
 
     res.json(result);
   } catch (err) {

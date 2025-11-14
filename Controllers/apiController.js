@@ -69,7 +69,7 @@ export async function getApi(uriMethode, params) {
     throw error;
   }
 }
-export async function postApiLegacy(data) {
+export async function postApi(data) {
   console.log(" postApi() appelée avec :", data);
 
   const { accessToken, urlRequete } = await getToken("sandbox");
@@ -102,7 +102,7 @@ export async function postApiLegacy(data) {
     throw error;
   }
 }
-export async function postApi(data) {
+export async function postApiLegacy(data) {
   console.log("postApi() appelée avec :", data);
 
   const { accessToken, urlRequete } = await getToken("sandbox");
