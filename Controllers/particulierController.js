@@ -149,6 +149,38 @@ export const createParticulier = (req, res) => {
       .json({ error: "Missing required fields", fields: missing });
   }
 
+  // Vérifier si l'idClient existe déjà dans la base
+  const idClient = resolveField("idClient");
+  if (idClient) {
+    const checkSql = `SELECT COUNT(*) as count FROM ${ParticulierModel.table} WHERE idClient = ?`;
+    db.query(checkSql, [idClient], (checkErr, checkResult) => {
+      if (checkErr) {
+        console.error("Error checking idClient:", checkErr);
+        return res.status(500).json({
+          error: "Database error",
+          details: checkErr.message,
+        });
+      }
+
+      if (checkResult[0].count > 0) {
+        return res.status(409).json({
+          error: "Client already exists",
+          message: `Un client avec l'ID ${idClient} existe déjà dans la base de données.`,
+          idClient: idClient,
+        });
+      }
+
+      // Si l'idClient n'existe pas, procéder à l'insertion
+      insertParticulier(body, resolveField, res);
+    });
+  } else {
+    // Si pas d'idClient fourni, procéder directement à l'insertion
+    insertParticulier(body, resolveField, res);
+  }
+};
+
+// Fonction helper pour l'insertion
+const insertParticulier = (body, resolveField, res) => {
   const columns = ParticulierModel.columns.filter(
     (c) => c !== "ID_Particulier"
   );

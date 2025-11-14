@@ -14,7 +14,7 @@ async function getToken(env = "sandbox") {
       );
 
     const { clientID, clientSecret, scope, urlToken, urlRequete } = config;
-     urlreq = urlRequete;
+    urlreq = urlRequete;
     const response = await axios.post(
       urlToken,
       querystring.stringify({
@@ -59,7 +59,7 @@ export async function getApi(uriMethode, params) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("reponse = ",response.data);
+    console.log("reponse = ", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -106,7 +106,7 @@ export async function postApiLegacy(data) {
   console.log("postApi() appelée avec :", data);
 
   const { accessToken, urlRequete } = await getToken("sandbox");
-  const { methode, data: payload } = data; 
+  const { methode, ...payload } = data; 
   const fullUrl = methode ? `${urlRequete}${methode}` : urlRequete;
 
   console.log("Appel URSSAF vers :", fullUrl);
@@ -120,10 +120,16 @@ export async function postApiLegacy(data) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log("Réponse brute URSSAF :", JSON.stringify(response.data, null, 2));
+    console.log(
+      "Réponse brute URSSAF :",
+      JSON.stringify(response.data, null, 2)
+    );
     return response.data;
   } catch (error) {
-    console.error("Erreur lors de l'appel à l'API URSSAF :", error.response?.data || error.message);
+    console.error(
+      "Erreur lors de l'appel à l'API URSSAF :",
+      error.response?.data || error.message
+    );
     console.error("Code HTTP :", error.response?.status);
     console.error("Headers :", error.response?.headers);
     throw error;
