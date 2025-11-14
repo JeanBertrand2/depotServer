@@ -10,6 +10,7 @@ import donneesRoutes from "./routes/donneesRoutes.js";
 import utilisateursRoutes from "./routes/utilisateurRoutes.js";
 import urssafRoutes from "./routes/urssafRoutes.js";
 import donneesComboRoutes from "./routes/donneeCombo.js";
+import sessionRoute from "./routes/sessionRoute.js";
 import cookieSession from "cookie-session";
 const app = express();
 app.use(express.json());
